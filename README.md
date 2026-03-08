@@ -37,9 +37,15 @@ The service:
 
 ## 📋 Prerequisites
 
+### Option 1: Running Locally
 - **Go**: 1.25.7 or higher
 - **RabbitMQ**: Running instance
 - **ClickHouse**: Running instance with appropriate database and table
+
+### Option 2: Running with Docker
+- **Docker**: 20.10 or higher
+- **RabbitMQ**: Running instance (local or remote)
+- **ClickHouse**: Running instance (local or remote)
 
 ### ClickHouse Table Schema
 
@@ -89,6 +95,8 @@ cp .env.example .env
 
 ### Running the Service
 
+#### Option 1: Run Locally
+
 ```bash
 # Using the built binary
 ./audit-ingestion-service
@@ -96,6 +104,29 @@ cp .env.example .env
 # Or run directly with Go
 go run ./cmd/audit-ingestion-service/main.go
 ```
+
+#### Option 2: Run with Docker
+
+```bash
+# Build the Docker image
+docker build -t audit-ingestion-service .
+
+# Run the container (connecting to host services)
+docker run --rm \
+  -e RABBITMQ_CONNECTION_URL=amqp://localhost:5672/ \
+  -e RABBITMQ_INGESTION_QUEUE_NAME=audit-ingestion \
+  -e CLICKHOUSE_HOST=localhost \
+  -e CLICKHOUSE_PORT=9000 \
+  -e CLICKHOUSE_DATABASE=default \
+  -e CLICKHOUSE_USERNAME=default \
+  -e CLICKHOUSE_PASSWORD= \
+  -e BATCH_INGESTION_SIZE=100 \
+  -e BATCH_FLUSH_INTERVAL_IN_SECONDS=30 \
+  --network host \
+  audit-ingestion-service
+```
+
+**Note**: The `--network host` flag allows the container to connect to services running on your host machine.
 
 ## ⚙️ Environment Variables
 
@@ -159,14 +190,49 @@ Failed messages in the DLQ can be inspected, corrected, and re-queued manually.
 
 ## 🐳 Docker Support
 
-> **Note**: Dockerfile is currently under development and will be added soon. This will enable easy containerized deployment of the service.
+The service can be run in a Docker container. The Dockerfile uses a multi-stage build to create a minimal Alpine-based image.
+
+### Build
+
+```bash
+docker build -t audit-ingestion-service .
+```
+
+### Run
+
+```bash
+# Basic run with environment variables
+docker run --rm \
+  -e RABBITMQ_CONNECTION_URL=amqp://your-rabbitmq:5672/ \
+  -e RABBITMQ_INGESTION_QUEUE_NAME=audit-ingestion \
+  -e CLICKHOUSE_HOST=your-clickhouse \
+  -e CLICKHOUSE_PORT=9000 \
+  -e CLICKHOUSE_DATABASE=default \
+  -e CLICKHOUSE_USERNAME=default \
+  -e CLICKHOUSE_PASSWORD=yourpassword \
+  audit-ingestion-service
+
+# Or use --network host to connect to local services
+docker run --rm --network host \
+  -e RABBITMQ_CONNECTION_URL=amqp://localhost:5672/ \
+  -e CLICKHOUSE_HOST=localhost \
+  audit-ingestion-service
+```
+
+### Environment File
+
+Alternatively, use an environment file:
+
+```bash
+# Create .env.docker with your configuration
+docker run --rm --env-file .env.docker audit-ingestion-service
+```
 
 ## �️ Roadmap
 
 The following features and improvements are planned for future releases:
 
 - [ ] **Database Migrations**: Create migration scripts to automatically initialize the ClickHouse audit table schema
-- [ ] **Docker Support**: Develop Dockerfile for containerized deployment
 - [ ] **Docker Hub Publishing**: Publish official Docker images to Docker Hub for easy distribution
 
 ## �📝 License
