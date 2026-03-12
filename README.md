@@ -270,13 +270,88 @@ Response when any service is unhealthy (HTTP 503):
 }
 ```
 
+## 📊 Query Audit Data
+
+The service provides an HTTP endpoint to query and filter audit data from ClickHouse.
+
+### List Audits
+
+```bash
+GET /audits
+```
+
+#### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `userId` | string | Filter by user ID |
+| `entity` | string | Filter by entity type (e.g., user, order) |
+| `entityId` | string | Filter by entity ID |
+| `action` | string | Filter by action (e.g., created, updated, deleted) |
+| `orderBy` | string | Order by timestamp: `asc` or `desc` (default: `desc`) |
+| `page` | integer | Page number (default: `1`) |
+| `perPage` | integer | Items per page (default: `100`, max: `1000`) |
+
+#### Examples
+
+Get all audits (first page, 100 items):
+```bash
+curl "http://localhost:8080/audits"
+```
+
+Filter by user ID:
+```bash
+curl "http://localhost:8080/audits?userId=user-123"
+```
+
+Filter by entity and action:
+```bash
+curl "http://localhost:8080/audits?entity=order&action=created"
+```
+
+Pagination with custom page size:
+```bash
+curl "http://localhost:8080/audits?page=2&perPage=50"
+```
+
+Combined filters with sorting:
+```bash
+curl "http://localhost:8080/audits?userId=admin-456&entity=user&orderBy=asc&page=1&perPage=20"
+```
+
+#### Response
+
+```json
+{
+  "audits": [
+    {
+      "timestamp": "2026-03-08T10:30:00Z",
+      "entity": "user",
+      "entityId": "user-123",
+      "action": "created",
+      "userId": "admin-456",
+      "payload": {
+        "email": "user@example.com",
+        "name": "John Doe"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "perPage": 100,
+    "totalPages": 5,
+    "totalCount": 450,
+    "count": 100
+  }
+}
+```
+
 ## �️ Roadmap
 
 The following features and improvements are planned for future releases:
 
 - [ ] **Database Migrations**: Create migration scripts to automatically initialize the ClickHouse audit table schema
 - [ ] **Docker Hub Publishing**: Publish official Docker images to Docker Hub for easy distribution
-- [ ] **HTTP Routes to Get Data from ClickHouse**: Implement REST API endpoints to query and retrieve audit data from ClickHouse
 ## �📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

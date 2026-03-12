@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/matheusm25/audit-ingestion-service/internal/http/handler"
+	audit_http_handler "github.com/matheusm25/audit-ingestion-service/internal/http/handler/audits"
 )
 
 type Server struct {
@@ -16,11 +17,13 @@ type Server struct {
 	router     *mux.Router
 }
 
-func NewServer(port int, healthHandler *handler.HealthHandler) *Server {
+func NewServer(port int, healthHandler *handler.HealthHandler, auditHandler *audit_http_handler.AuditHandler) *Server {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/health", healthHandler.HealthCheckHandler).Methods("GET")
 	router.HandleFunc("/health/services", healthHandler.HealthCheckServicesHandler).Methods("GET")
+
+	router.HandleFunc("/audits", auditHandler.ListAuditsHandler).Methods("GET")
 
 	return &Server{
 		httpServer: &http.Server{
