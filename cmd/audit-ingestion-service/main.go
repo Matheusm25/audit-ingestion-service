@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/matheusm25/audit-ingestion-service/internal/config"
 	"github.com/matheusm25/audit-ingestion-service/internal/consumer/audit"
+	"github.com/matheusm25/audit-ingestion-service/internal/http/server"
 	"github.com/matheusm25/audit-ingestion-service/internal/platform/clickhouse"
 	"github.com/matheusm25/audit-ingestion-service/internal/platform/rabbitmq"
 	"github.com/matheusm25/audit-ingestion-service/internal/repository"
@@ -52,6 +54,13 @@ func main() {
 
 	auditRepo := repository.NewAuditRepository(clickhouseConn)
 
+	httpServer := server.NewServer(cfg.App.HTTPPort)
+	go func() {
+		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Failed to start HTTP server:", err)
+		}
+	}()
+
 	listener := audit.NewListener(
 		rabbitmqConnection,
 		ctx,
@@ -66,4 +75,8 @@ func main() {
 
 	log.Println("Starting audit ingestion service...")
 	listener.ListenForMessages()
+
+	if err := httpServer.Shutdown(context.Background()); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+	}
 }

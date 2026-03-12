@@ -141,6 +141,7 @@ docker run --rm \
 | `CLICKHOUSE_PASSWORD` | ClickHouse password | `""` (empty) |
 | `BATCH_INGESTION_SIZE` | Number of events to accumulate before flushing to ClickHouse | `100` |
 | `BATCH_FLUSH_INTERVAL_IN_SECONDS` | Maximum time (in seconds) to wait before flushing a batch | `30` |
+| `HTTP_PORT` | Port for the HTTP server (health check endpoint) | `8080` |
 
 ### Configuration Tips
 
@@ -234,7 +235,8 @@ The following features and improvements are planned for future releases:
 
 - [ ] **Database Migrations**: Create migration scripts to automatically initialize the ClickHouse audit table schema
 - [ ] **Docker Hub Publishing**: Publish official Docker images to Docker Hub for easy distribution
-
+- [ ] **HTTP Health Check with Services Check Endpoint**: Add a comprehensive health check endpoint that verifies connectivity with RabbitMQ and ClickHouse
+- [ ] **HTTP Routes to Get Data from ClickHouse**: Implement REST API endpoints to query and retrieve audit data from ClickHouse
 ## �📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

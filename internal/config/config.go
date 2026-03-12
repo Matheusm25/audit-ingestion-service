@@ -30,6 +30,7 @@ type RabbitMQConfig struct {
 type AppConfig struct {
 	BatchIngestionSize int
 	BatchFlushInterval int
+	HTTPPort           int
 }
 
 func Load() (*Config, error) {
@@ -52,6 +53,7 @@ func Load() (*Config, error) {
 		App: AppConfig{
 			BatchIngestionSize: getEnvAsInt("BATCH_INGESTION_SIZE", 100),
 			BatchFlushInterval: getEnvAsInt("BATCH_FLUSH_INTERVAL_IN_SECONDS", 30),
+			HTTPPort:           getEnvAsInt("HTTP_PORT", 80),
 		},
 	}
 
