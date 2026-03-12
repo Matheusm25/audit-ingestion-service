@@ -16,11 +16,11 @@ type Server struct {
 	router     *mux.Router
 }
 
-func NewServer(port int) *Server {
+func NewServer(port int, healthHandler *handler.HealthHandler) *Server {
 	router := mux.NewRouter()
 
-	// Register health check endpoint
-	router.HandleFunc("/health", handler.HealthCheckHandler).Methods("GET")
+	router.HandleFunc("/health", healthHandler.HealthCheckHandler).Methods("GET")
+	router.HandleFunc("/health/services", healthHandler.HealthCheckServicesHandler).Methods("GET")
 
 	return &Server{
 		httpServer: &http.Server{

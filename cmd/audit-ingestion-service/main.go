@@ -11,6 +11,8 @@ import (
 
 	"github.com/matheusm25/audit-ingestion-service/internal/config"
 	"github.com/matheusm25/audit-ingestion-service/internal/consumer/audit"
+	"github.com/matheusm25/audit-ingestion-service/internal/health"
+	"github.com/matheusm25/audit-ingestion-service/internal/http/handler"
 	"github.com/matheusm25/audit-ingestion-service/internal/http/server"
 	"github.com/matheusm25/audit-ingestion-service/internal/platform/clickhouse"
 	"github.com/matheusm25/audit-ingestion-service/internal/platform/rabbitmq"
@@ -54,7 +56,10 @@ func main() {
 
 	auditRepo := repository.NewAuditRepository(clickhouseConn)
 
-	httpServer := server.NewServer(cfg.App.HTTPPort)
+	healthChecker := health.NewChecker(&rabbitmqConnection, clickhouseConn)
+	healthHandler := handler.NewHealthHandler(healthChecker)
+
+	httpServer := server.NewServer(cfg.App.HTTPPort, healthHandler)
 	go func() {
 		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("Failed to start HTTP server:", err)

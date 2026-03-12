@@ -229,13 +229,53 @@ Alternatively, use an environment file:
 docker run --rm --env-file .env.docker audit-ingestion-service
 ```
 
+## 🏥 Health Check Endpoints
+
+The service exposes HTTP health check endpoints for monitoring:
+
+### Basic Health Check
+
+```bash
+curl http://localhost:8080/health
+```
+
+Response:
+```json
+{
+  "status": "healthy"
+}
+```
+
+### Services Health Check
+
+Checks connectivity with RabbitMQ and ClickHouse:
+
+```bash
+curl http://localhost:8080/health/services
+```
+
+Response when all services are healthy (HTTP 200):
+```json
+{
+  "rabbitMQStatus": "healthy",
+  "clickHouseStatus": "healthy"
+}
+```
+
+Response when any service is unhealthy (HTTP 503):
+```json
+{
+  "rabbitMQStatus": "unhealthy",
+  "clickHouseStatus": "healthy"
+}
+```
+
 ## �️ Roadmap
 
 The following features and improvements are planned for future releases:
 
 - [ ] **Database Migrations**: Create migration scripts to automatically initialize the ClickHouse audit table schema
 - [ ] **Docker Hub Publishing**: Publish official Docker images to Docker Hub for easy distribution
-- [ ] **HTTP Health Check with Services Check Endpoint**: Add a comprehensive health check endpoint that verifies connectivity with RabbitMQ and ClickHouse
 - [ ] **HTTP Routes to Get Data from ClickHouse**: Implement REST API endpoints to query and retrieve audit data from ClickHouse
 ## �📝 License
 
