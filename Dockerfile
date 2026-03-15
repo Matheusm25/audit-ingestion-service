@@ -23,5 +23,8 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/audit-ingestion-service .
 
+# Expose HTTP port
+EXPOSE 80
+
 # Run the application
 CMD ["./audit-ingestion-service"]

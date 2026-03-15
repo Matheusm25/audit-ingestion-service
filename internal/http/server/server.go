@@ -27,7 +27,7 @@ func NewServer(port int, healthHandler *handler.HealthHandler, auditHandler *aud
 
 	return &Server{
 		httpServer: &http.Server{
-			Addr:         fmt.Sprintf("localhost:%d", port),
+			Addr:         fmt.Sprintf("0.0.0.0:%d", port),
 			Handler:      router,
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
