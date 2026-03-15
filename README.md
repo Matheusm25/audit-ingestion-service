@@ -1,5 +1,7 @@
 # 🔍 Audit Ingestion Service
 
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-matheusml25%2Faudit--ingestion--service-blue?logo=docker)](https://hub.docker.com/r/matheusml25/audit-ingestion-service)
+
 A high-performance Go service that consumes audit events from RabbitMQ and efficiently stores them in ClickHouse using batch processing. Built for scalability and reliability with Dead Letter Queue (DLQ) support for fault tolerance.
 
 ## ✨ Features
@@ -193,17 +195,20 @@ Failed messages in the DLQ can be inspected, corrected, and re-queued manually.
 
 The service can be run in a Docker container. The Dockerfile uses a multi-stage build to create a minimal Alpine-based image.
 
-### Build
+### Pull from Docker Hub
+
+A pre-built image is available on Docker Hub:
 
 ```bash
-docker build -t audit-ingestion-service .
+docker pull matheusml25/audit-ingestion-service:latest
 ```
 
-### Run
+### Run from Docker Hub
 
 ```bash
 # Basic run with environment variables
 docker run --rm \
+  -p 8080:80 \
   -e RABBITMQ_CONNECTION_URL=amqp://your-rabbitmq:5672/ \
   -e RABBITMQ_INGESTION_QUEUE_NAME=audit-ingestion \
   -e CLICKHOUSE_HOST=your-clickhouse \
@@ -211,13 +216,21 @@ docker run --rm \
   -e CLICKHOUSE_DATABASE=default \
   -e CLICKHOUSE_USERNAME=default \
   -e CLICKHOUSE_PASSWORD=yourpassword \
-  audit-ingestion-service
+  matheusml25/audit-ingestion-service:latest
 
 # Or use --network host to connect to local services
 docker run --rm --network host \
   -e RABBITMQ_CONNECTION_URL=amqp://localhost:5672/ \
   -e CLICKHOUSE_HOST=localhost \
-  audit-ingestion-service
+  matheusml25/audit-ingestion-service:latest
+```
+
+### Build Locally
+
+Alternatively, you can build the image yourself:
+
+```bash
+docker build -t audit-ingestion-service .
 ```
 
 ### Environment File
@@ -351,7 +364,7 @@ curl "http://localhost:8080/audits?userId=admin-456&entity=user&orderBy=asc&page
 The following features and improvements are planned for future releases:
 
 - [ ] **Database Migrations**: Create migration scripts to automatically initialize the ClickHouse audit table schema
-- [ ] **Docker Hub Publishing**: Publish official Docker images to Docker Hub for easy distribution
+
 ## �📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
