@@ -124,6 +124,7 @@ docker run --rm \
   -e CLICKHOUSE_PASSWORD= \
   -e BATCH_INGESTION_SIZE=100 \
   -e BATCH_FLUSH_INTERVAL_IN_SECONDS=30 \
+  -e API_KEY=your_secure_api_key \
   --network host \
   audit-ingestion-service
 ```
@@ -144,6 +145,7 @@ docker run --rm \
 | `BATCH_INGESTION_SIZE` | Number of events to accumulate before flushing to ClickHouse | `100` |
 | `BATCH_FLUSH_INTERVAL_IN_SECONDS` | Maximum time (in seconds) to wait before flushing a batch | `30` |
 | `HTTP_PORT` | Port for the HTTP server (health check endpoint) | `8080` |
+| `API_KEY` | API key required for accessing the `/audits` endpoint | `default_api_key` |
 
 ### Configuration Tips
 
@@ -216,12 +218,14 @@ docker run --rm \
   -e CLICKHOUSE_DATABASE=default \
   -e CLICKHOUSE_USERNAME=default \
   -e CLICKHOUSE_PASSWORD=yourpassword \
+  -e API_KEY=your_secure_api_key \
   matheusml25/audit-ingestion-service:latest
 
 # Or use --network host to connect to local services
 docker run --rm --network host \
   -e RABBITMQ_CONNECTION_URL=amqp://localhost:5672/ \
   -e CLICKHOUSE_HOST=localhost \
+  -e API_KEY=your_secure_api_key \
   matheusml25/audit-ingestion-service:latest
 ```
 
@@ -293,6 +297,8 @@ The service provides an HTTP endpoint to query and filter audit data from ClickH
 GET /audits
 ```
 
+**Authentication Required**: This endpoint requires an API key to be provided in the `x-api-key` header.
+
 #### Query Parameters
 
 | Parameter | Type | Description |
@@ -309,27 +315,27 @@ GET /audits
 
 Get all audits (first page, 100 items):
 ```bash
-curl "http://localhost:8080/audits"
+curl -H "x-api-key: your_api_key" "http://localhost:8080/audits"
 ```
 
 Filter by user ID:
 ```bash
-curl "http://localhost:8080/audits?userId=user-123"
+curl -H "x-api-key: your_api_key" "http://localhost:8080/audits?userId=user-123"
 ```
 
 Filter by entity and action:
 ```bash
-curl "http://localhost:8080/audits?entity=order&action=created"
+curl -H "x-api-key: your_api_key" "http://localhost:8080/audits?entity=order&action=created"
 ```
 
 Pagination with custom page size:
 ```bash
-curl "http://localhost:8080/audits?page=2&perPage=50"
+curl -H "x-api-key: your_api_key" "http://localhost:8080/audits?page=2&perPage=50"
 ```
 
 Combined filters with sorting:
 ```bash
-curl "http://localhost:8080/audits?userId=admin-456&entity=user&orderBy=asc&page=1&perPage=20"
+curl -H "x-api-key: your_api_key" "http://localhost:8080/audits?userId=admin-456&entity=user&orderBy=asc&page=1&perPage=20"
 ```
 
 #### Response

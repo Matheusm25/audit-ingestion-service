@@ -17,13 +17,31 @@ type Server struct {
 	router     *mux.Router
 }
 
-func NewServer(port int, healthHandler *handler.HealthHandler, auditHandler *audit_http_handler.AuditHandler) *Server {
+func apiKeyMiddleware(apiKey string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			providedKey := r.Header.Get("x-api-key")
+			if providedKey == "" {
+				http.Error(w, "Missing API key", http.StatusUnauthorized)
+				return
+			}
+			if providedKey != apiKey {
+				http.Error(w, "Invalid API key", http.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func NewServer(port int, apiKey string, healthHandler *handler.HealthHandler, auditHandler *audit_http_handler.AuditHandler) *Server {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/health", healthHandler.HealthCheckHandler).Methods("GET")
 	router.HandleFunc("/health/services", healthHandler.HealthCheckServicesHandler).Methods("GET")
 
-	router.HandleFunc("/audits", auditHandler.ListAuditsHandler).Methods("GET")
+	auditsRoute := router.HandleFunc("/audits", auditHandler.ListAuditsHandler).Methods("GET")
+	auditsRoute.Handler(apiKeyMiddleware(apiKey)(auditsRoute.GetHandler()))
 
 	return &Server{
 		httpServer: &http.Server{

@@ -31,6 +31,7 @@ type AppConfig struct {
 	BatchIngestionSize int
 	BatchFlushInterval int
 	HTTPPort           int
+	APIKey             string
 }
 
 func Load() (*Config, error) {
@@ -54,6 +55,7 @@ func Load() (*Config, error) {
 			BatchIngestionSize: getEnvAsInt("BATCH_INGESTION_SIZE", 100),
 			BatchFlushInterval: getEnvAsInt("BATCH_FLUSH_INTERVAL_IN_SECONDS", 30),
 			HTTPPort:           getEnvAsInt("HTTP_PORT", 80),
+			APIKey:             getEnv("API_KEY", "default_api_key"),
 		},
 	}
 

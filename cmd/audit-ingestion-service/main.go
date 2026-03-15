@@ -62,7 +62,7 @@ func main() {
 	
 	auditHandler := audit_http_handler.NewAuditHandler(auditRepo)
 
-	httpServer := server.NewServer(cfg.App.HTTPPort, healthHandler, auditHandler)
+	httpServer := server.NewServer(cfg.App.HTTPPort, cfg.App.APIKey, healthHandler, auditHandler)
 	go func() {
 		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("Failed to start HTTP server:", err)
